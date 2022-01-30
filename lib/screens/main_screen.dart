@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -13,6 +14,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  late Completer _controllerCompleter = Completer();
   late WebViewController _webViewController;
 
   Size get screenSize => MediaQuery.of(context).size;
@@ -32,22 +34,15 @@ class _MainScreenState extends State<MainScreen> {
           SafeArea(
             top: true,
             bottom: false,
-            child: Listener(
-              onPointerMove: (moveEvent) {
-                if (moveEvent.delta.dx > 30) {
-                  _webViewController.currentUrl().then(
-                    (value) {
-                      if (value != 'https://tiksee.ru') {
-                        _webViewController.goBack();
-                      }
-                    },
-                  );
-                }
-              },
+            child: WillPopScope(
+              onWillPop: () => _goBack(context),
               child: WebView(
-                onWebViewCreated: (controller) {
+                gestureNavigationEnabled: true,
+                onWebViewCreated: (WebViewController webViewController) {
                   setState(() {
-                    _webViewController = controller;
+                    _controllerCompleter.future
+                        .then((value) => _webViewController = value);
+                    _controllerCompleter.complete(webViewController);
                   });
                 },
                 initialUrl: 'https://tiksee.ru',
@@ -63,5 +58,10 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
     );
+  }
+
+  Future<bool> _goBack(BuildContext context) async {
+    _webViewController.canGoBack();
+    return Future.value(false);
   }
 }
