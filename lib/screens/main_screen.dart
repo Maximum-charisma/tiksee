@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'dart:math';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tiksee/update.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -14,10 +11,11 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  late Completer _controllerCompleter = Completer();
+  late final Completer _controllerCompleter = Completer();
   late WebViewController _webViewController;
 
   Size get screenSize => MediaQuery.of(context).size;
+  Color _backgroundColor = Colors.white;
 
   @override
   void initState() {
@@ -28,7 +26,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: _backgroundColor,
       body: Stack(
         children: [
           SafeArea(
@@ -43,6 +41,11 @@ class _MainScreenState extends State<MainScreen> {
                     _controllerCompleter.future
                         .then((value) => _webViewController = value);
                     _controllerCompleter.complete(webViewController);
+                  });
+                },
+                onPageStarted: (string) {
+                  setState(() {
+                    _backgroundColor = Color.fromRGBO(192, 255, 57, 1);
                   });
                 },
                 initialUrl: 'https://tiksee.ru',
